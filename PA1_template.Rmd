@@ -1,25 +1,41 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+a=read.csv("activity.csv",sep=",")
 
+b<-aggregate(steps~date,a,sum)
+hist(b$steps, main="Histogram of daily steps")
 
-## Loading and preprocessing the data
+average<-mean(b$steps)
+med<-median(b$steps)
 
+averagesteps<- aggregate(steps~interval,a, mean)
+plot(steps~interval,data=averagesteps, type = "l", 
+     main = "Average daily activity pattern")
 
+averagesteps[which.max(averagesteps[, 2]), 1]
 
-## What is mean total number of steps taken per day?
+for (i in 1:dim(a)[1]) {
+  if (is.na(a$steps[i])) {
+    for (j in 1:dim(averagesteps)[1]) {
+      if (a$interval[i] == averagesteps[j, 1]) {
+        a$steps[i] = averagesteps[j, 2]
+      }
+    } 
+  }    
+}
 
+newsteps<-aggregate(steps~date,a,sum)
+hist(newsteps$steps, main="Histogram of daily steps")
 
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+library(dplyr)
+a$weekday<-format ( as.POSIXct ( a$date),      "%A" )
+a<-a %>% mutate("Day"=case_when(
+  weekday=="Monday" ~ "weekday",
+  weekday=="Tuesday" ~"weekday",
+  weekday=="Wednesday" ~ "weekday",
+  weekday=="Thursday" ~ "weekday",
+  weekday=="Friday" ~ "weekday",
+  weekday=="Saturday" ~ "weekend",
+  weekday=="Sunday" ~ "weekend"))
+newaverage<- aggregate(steps~interval+Day,data=a, mean)
+par(mfrow=c(2,1))
+plot(steps~interval,data=filter(newaverage,Day=="weekday"), main = "Activity during the  week")
+plot(steps~interval,data=filter(newaverage,Day=="weekend"), main = "Activity during the  week")
