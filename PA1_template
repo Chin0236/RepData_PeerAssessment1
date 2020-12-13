@@ -1,0 +1,12 @@
+a=read.csv("activity.csv",sep=",")
+b=na.omit(a)
+c=unique(b[2])
+sum=rep(0,dim(c)[1])
+for (i in 1:dim(c)[1]){
+  for (j in 1:dim(b)[1]){
+    if (b[j,2]==c[i,1]){
+      sum[i]=sum[i]+b[j,1]
+    }
+  }
+}
+hist(sum)
